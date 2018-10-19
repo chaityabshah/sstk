@@ -147,15 +147,16 @@ function __fsWriteToFileCallback(opts) {
         fileWriter.seek(fileWriter.length);
         fileWriter.write(blob);
       } else {
+        /*
         if (fileWriter.length > 0) {
           // Not appending, lets truncates file to 0
           console.log('Truncate file ' + fileEntry.fullPath );
           truncating = true;
           fileWriter.truncate(0);
           // After truncate is successful - should get onwriteend callback...
-        } else {
+        } else {*/
           fileWriter.write(blob);
-        }
+        //}
       }
     }, errorHandler);
 

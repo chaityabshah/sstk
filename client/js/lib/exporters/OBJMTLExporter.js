@@ -17,6 +17,7 @@ function OBJMTLExporter(options) {
   options = options || {};
   this.__fs = options.fs || FileUtil;
   this.includeChildModelInstances = false;
+  this.glob_points = [];
 }
 
 var toVertexStr = function (vi, ti, ni) {
@@ -52,6 +53,7 @@ var getObjMtl = function (root, params, data) {
   var startUvOffset = params.uvOffset || 0;
   var materialOffset = params.materialOffset || 0;
   data = _.defaults(data || {}, { v: [], vt: [], vn: [], f: [] });
+  points = []
   if (!params.includeNotVisible && !root.visible) {
     // Ignore invisible meshes
     return data;
@@ -74,7 +76,9 @@ var getObjMtl = function (root, params, data) {
     var uvOffset = startUvOffset + data.vt.length + 1;
     var vi = 0;
     GeometryUtil.forMeshVerticesWithTransform(root, function (v, attrs) {
+      //console.log(toObjStr('v', v));
       data.v.push(toObjStr('v', v));
+      points.push(toObjStr('', v).trim())
       if (attrs) {
         for (var i = 0; i < attrInfos.length; i++) {
           if (attrs[i]) {
@@ -143,7 +147,9 @@ var getObjMtl = function (root, params, data) {
   //     getObjMtl(root.children[i], params, data);
   //   }
   // }
-  return data;
+  
+
+  return [data, points];
 };
 
 /**
@@ -226,6 +232,13 @@ OBJMTLExporter.prototype.export = function (objects, opts) {
           console.err('Error exporting objects!', err);
         }
         fileutil.fsExportFile(objfile, objfile);
+        var header = 'FIELDS x y z\nSIZE 4 4 4\nTYPE F F F\nPOINTS ' + this.glob_points.length + '\nDATA ascii\n';
+        var filest = header + this.glob_points.join('\n');
+        console.log(filest.length);
+        console.log(this.glob_points.length);
+        fileutil.fsWriteToFile('test.pcd', filest, callback);
+        fileutil.fsExportFile('test.pcd','test.pcd');
+        this.glob_points = [];
         if (mtlfile) {
           fileutil.fsExportFile(mtlfile, mtlfile);
         }
@@ -244,7 +257,7 @@ OBJMTLExporter.prototype.export = function (objects, opts) {
             callback(err, exportResults);
           }
         });
-      }
+      }.bind(scope)
     );
   };
 
@@ -421,6 +434,8 @@ OBJMTLExporter.prototype.__exportMesh = function (mesh, result, params, callback
         materialOffset: result.indexMaterials,
         materials: result.materials,
         materialsIndex: result.materialsIndex });
+    points = data[1];
+    data = data[0];
     obj += data.v.join('\n') + '\n'
         + ((data.vn.length > 0)? (data.vn.join('\n') + '\n') : '')
         + ((data.vt.length > 0)? (data.vt.join('\n') + '\n') : '')
@@ -436,6 +451,10 @@ OBJMTLExporter.prototype.__exportMesh = function (mesh, result, params, callback
   result.indexNormals += nbNormals;
 
   params.appendToObj(obj, callback);
+  this.glob_points = this.glob_points.concat(points);
+  //debugger;
+  //fileutil = this.__fs;
+  //fileutil.fsWriteToFile('test.pcd', points, callback);
 };
 
 OBJMTLExporter.prototype.__getTexturePath = function(src, params) {
@@ -522,7 +541,6 @@ OBJMTLExporter.prototype.__getMaterialString = function(mat, matId, params) {
 
 OBJMTLExporter.prototype.__exportObject = function (object, params, callback) {
   var scope = this;
-
   if (!params.includeNotVisible && !object.visible) {
     // Ignore invisible objects - nothing to do!
     setTimeout(function () { callback(); }, 0);
