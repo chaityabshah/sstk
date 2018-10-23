@@ -5,6 +5,7 @@
   "main": "stk-ssc",
   "dependencies": {
     "lerna": "^2.11.0",
+    "outliers": "0.0.3",
     "shelljs": "^0.7.0"
   },
   "scripts": {

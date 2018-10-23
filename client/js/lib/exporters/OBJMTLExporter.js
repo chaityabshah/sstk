@@ -5,6 +5,7 @@ var Index = require('ds/Index');
 var TaskQueue = require('util/TaskQueue');
 var async = require('async');
 var _ = require('util');
+var outliers = require('outliers');
 
 /**
  * Export a mesh as OBJ and MTL
@@ -18,6 +19,8 @@ function OBJMTLExporter(options) {
   this.__fs = options.fs || FileUtil;
   this.includeChildModelInstances = false;
   this.glob_points = [];
+  this.sums = {x: 0, y: 0, z: 0};
+  this.count = 0;
 }
 
 var toVertexStr = function (vi, ti, ni) {
@@ -236,6 +239,7 @@ OBJMTLExporter.prototype.export = function (objects, opts) {
         var filest = header + this.glob_points.join('\n');
         console.log(filest.length);
         console.log(this.glob_points.length);
+        fileutil.fsAppendToFile('test.pcd', '', callback);
         fileutil.fsWriteToFile('test.pcd', filest, callback);
         fileutil.fsExportFile('test.pcd','test.pcd');
         this.glob_points = [];
@@ -451,6 +455,17 @@ OBJMTLExporter.prototype.__exportMesh = function (mesh, result, params, callback
   result.indexNormals += nbNormals;
 
   params.appendToObj(obj, callback);
+  
+  /*split_data = points.map((x) => {
+    var arr = x.split(" ").map(y => parseFloat(y))
+    return {x: arr[0], y: arr[1], z:arr[2]};
+  });
+  
+  split_data.filter(outliers('x'));
+  
+  split_data.filter(outliers('z'));
+  */
+
   this.glob_points = this.glob_points.concat(points);
   //debugger;
   //fileutil = this.__fs;
