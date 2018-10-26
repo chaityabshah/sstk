@@ -1,13 +1,13 @@
 'use strict';
 
 define(['Constants', 'audio/Sounds', 'model/Model', 'scene/SceneState',
-    'loaders/P5DTextureLoader', 'assets/LightsLoader',
+    'loaders/P5DTextureLoader', 'assets/LightsLoader', 'exporters/OBJMTLExporter',
     'assets/AssetGroups', 'assets/AssetsDb', "assets/AssetLoaders",
     'assets/CachedAssetLoader', 'assets/AssetCache', 'assets/AssetLoader',
     'geo/Object3DUtil', 'materials/Materials', 'util/TaskQueue', 'PubSub', 'async', 'util',
     'three-loaders', 'base'],
   function (Constants, Sounds, Model, SceneState,
-            P5DTextureLoader, LightsLoader,
+            P5DTextureLoader, LightsLoader, OBJMTLExporter,
             AssetGroups, AssetsDb, AssetLoaders,
             CachedAssetLoader, AssetCache, AssetLoader, 
             Object3DUtil, Materials,
@@ -1457,7 +1457,10 @@ define(['Constants', 'audio/Sounds', 'model/Model', 'scene/SceneState',
           console.log(sceneResult);
           console.log(sceneinfo);
         }
+
         if (sceneState) {
+          var exp = new OBJMTLExporter();
+          exp.export(sceneState.scene, { name: sceneState.info.fullId, textureDir: '../texture/' });
           // Let's see if they wanted to hide some stuff!
           if (sceneinfo.hideCategories) {
             var cats = sceneinfo.hideCategories;
