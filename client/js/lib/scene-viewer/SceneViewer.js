@@ -311,7 +311,7 @@ define(['Constants', 'scene/SceneGenerator', 'scene/SceneHierarchyPanel',
       this.defaultViewMode = allParams['viewMode'];
       this.defaultModelFormat = allParams['modelFormat'] || params.defaultModelFormat || 'utf8v2';
       this.defaultSceneFormat = allParams['format'] || params.defaultSceneFormat || 'wss';
-      this.localLoadingFiletypes = allParams['localLoadingFiletypes'] || ['scene', 'model', 'actionTrace', 'navmap', 'wall'];
+      this.localLoadingFiletypes = allParams['localLoadingFiletypes'] || ['scene', 'model', 'actionTrace', 'navmap', 'wall', 'list'];
       this.loadAll = allParams['loadAll'];
       this.includeCeiling = allParams['includeCeiling'];
       this._showCeiling = allParams.showCeiling || false;
@@ -1421,6 +1421,7 @@ define(['Constants', 'scene/SceneGenerator', 'scene/SceneHierarchyPanel',
 
     // Clears and loads a new scene
     SceneViewer.prototype.clearAndLoadScene = function (sceneinfo, loadOptions) {
+      
       if (this.isLoading) {
         console.log('Loading is in progress...');
         return;
@@ -1589,11 +1590,35 @@ define(['Constants', 'scene/SceneGenerator', 'scene/SceneHierarchyPanel',
         this.visualizeNavmap(file);
       } else if (fileType === 'model') {
         this.loadModelFromLocal(file);
+      } else if (fileType === 'list') {
+        this.loadExportList(file);
       } else {
         this.loadSceneFromLocal(file);
       }
     };
 
+    SceneViewer.prototype.loadExportList = function (file) {
+      if (file) {
+        debugger;
+        var fs = FileUtil;
+        fs.fsReadFile("/home/chaityabshah/Documents/research/suncg/output.txt", ()=>console.log("success"), ()=>console.log("fail"))
+        debugger;
+        read = new FileReader();
+        read.readAsBinaryString(file);
+        debugger;
+        read.onloadend = function(){
+          var result = read.result.split("\n");
+          debugger;
+          //for (var i = 0; i < read.result.length; i++) {
+            //console.log(result[i]);
+          //}
+          //this.clearAndLoadScene({ file: file });
+      }
+      } else {
+        console.log('No file?');
+      }
+    };
+    
     SceneViewer.prototype.visualizeWalls = function(filename) {
       if (!filename) {
         filename = this.sceneState.info.wall.path;
